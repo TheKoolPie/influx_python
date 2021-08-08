@@ -1,0 +1,41 @@
+version: "3"
+services:
+  influxdb:
+    image: influxdb:1.8.6
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb:/var/lib/influxdb
+    networks:
+      - elev_disp
+
+  db_subscriber:
+    build:
+      context: .
+      dockerfile: DockerfilePython.dockerfile
+    depends_on: 
+      - influxdb
+    networks:
+      - elev_disp
+
+  dashboard:
+    image: grafana/grafana
+    depends_on:
+      - influxdb
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana:/var/lib/grafana
+    networks:
+      - elev_disp
+
+volumes:
+  influxdb:
+  grafana:
+
+networks:
+  elev_disp:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
